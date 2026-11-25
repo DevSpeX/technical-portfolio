@@ -1,0 +1,563 @@
+@import "tailwindcss";
+
+/*
+ * Obsidian & Precision Slate Design System
+ * Dark-first, high-contrast engineering palette with restrained technical accents.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Surface hierarchy */
+  --surface-canvas: #07080a;
+  --surface-primary: #0b0d11;
+  --surface-elevated: #11141b;
+  --surface-overlay: #171b24;
+  --surface-subtle: #1d222e;
+
+  /* Borders & structural hairlines */
+  --border-subtle: #1e2430;
+  --border-default: #2c3444;
+  --border-strong: #475569;
+  --border-focus: #93c5fd;
+
+  /* Ink & typography tokens (WCAG AA+ against canvas and elevated surfaces) */
+  --text-primary: #f1f5f9;
+  --text-secondary: #a8b3c7;
+  --text-muted: #7e8ba3;
+  --text-inverse: #07080a;
+
+  /* Technical accent spectrum (industrial cobalt, mineral emerald, muted tungsten amber) */
+  --accent-primary: #60a5fa;
+  --accent-primary-hover: #93c5fd;
+  --accent-primary-soft: color-mix(in oklab, var(--accent-primary) 14%, transparent);
+
+  --accent-emerald: #34d399;
+  --accent-emerald-soft: color-mix(in oklab, var(--accent-emerald) 14%, transparent);
+
+  --accent-amber: #e5a955;
+  --accent-amber-soft: color-mix(in oklab, var(--accent-amber) 14%, transparent);
+
+  --accent-crimson: #e57373;
+
+  /* Browser UI theming */
+  --scrollbar-track: #0b0d11;
+  --scrollbar-thumb: #526077;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+@supports not (scrollbar-color: auto) {
+  :root::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+
+  :root::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  :root::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border: 2px solid var(--scrollbar-track);
+    border-radius: 9999px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border-subtle: #3b465b;
+    --border-default: #52617d;
+    --border-strong: #6f809e;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+  }
+}
+
+@media (forced-colors: active) {
+  :root {
+    --surface-canvas: Canvas;
+    --surface-primary: Canvas;
+    --surface-elevated: Canvas;
+    --surface-overlay: Canvas;
+    --surface-subtle: Canvas;
+    --border-subtle: CanvasText;
+    --border-default: CanvasText;
+    --border-strong: Highlight;
+    --border-focus: Highlight;
+    --text-primary: CanvasText;
+    --text-secondary: CanvasText;
+    --text-muted: GrayText;
+    --text-inverse: Canvas;
+    --accent-primary: Highlight;
+    --accent-primary-hover: Highlight;
+    --accent-emerald: Highlight;
+    --accent-amber: Highlight;
+  }
+}
+
+@theme inline {
+  --color-canvas: var(--surface-canvas);
+  --color-surface: var(--surface-primary);
+  --color-elevated: var(--surface-elevated);
+  --color-overlay: var(--surface-overlay);
+  --color-subtle: var(--surface-subtle);
+
+  --color-border-subtle: var(--border-subtle);
+  --color-border: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-focus: var(--border-focus);
+
+  --color-ink: var(--text-primary);
+  --color-ink-secondary: var(--text-secondary);
+  --color-ink-muted: var(--text-muted);
+  --color-ink-inverse: var(--text-inverse);
+
+  --color-accent: var(--accent-primary);
+  --color-accent-hover: var(--accent-primary-hover);
+  --color-accent-soft: var(--accent-primary-soft);
+  --color-emerald: var(--accent-emerald);
+  --color-emerald-soft: var(--accent-emerald-soft);
+  --color-amber: var(--accent-amber);
+  --color-amber-soft: var(--accent-amber-soft);
+  --color-crimson: var(--accent-crimson);
+
+  --font-sans: var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@layer base {
+  html {
+    accent-color: var(--accent-primary);
+    background-color: var(--surface-canvas);
+    color: var(--text-primary);
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--surface-canvas);
+    color: var(--text-primary);
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--accent-primary) 28%, var(--surface-elevated));
+    color: var(--text-primary);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+  }
+
+  /* Lenis Smooth Scroll structural bindings */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+
+  .lenis.lenis-stopped {
+    overflow: clip;
+  }
+}
+
+/* ============================================================================
+ * Phase 2 Core UX Styles: Spotlight, Dialog, Toast Popover, Scrollspy, X-Ray
+ * ============================================================================ */
+
+/* SpotlightCard GPU layers */
+.spotlight-card {
+  position: relative;
+  --mouse-x: -999px;
+  --mouse-y: -999px;
+  --spotlight-opacity: 0;
+  --spotlight-size: 380px;
+  --spotlight-border-color: color-mix(in oklab, var(--accent-primary) 55%, transparent);
+  --spotlight-surface-color: color-mix(in oklab, var(--accent-primary) 9%, transparent);
+}
+
+.spotlight-border {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    var(--spotlight-size) circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-border-color),
+    transparent 65%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: var(--spotlight-opacity);
+  transition: opacity 220ms ease;
+}
+
+.spotlight-surface {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    var(--spotlight-size) circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-surface-color),
+    transparent 65%
+  );
+  opacity: var(--spotlight-opacity);
+  transition: opacity 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce), (forced-colors: active) {
+  .spotlight-border,
+  .spotlight-surface {
+    display: none;
+  }
+}
+
+/* Command Palette native <dialog> modal & scroll containment */
+dialog.command-palette-dialog {
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  max-width: min(40rem, calc(100vw - 1.5rem));
+  width: 100%;
+  max-height: min(36rem, calc(100dvh - 3rem));
+  overflow: visible;
+}
+
+dialog.command-palette-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+dialog.command-palette-dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog.command-palette-dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: color-mix(in oklab, var(--surface-canvas) 74%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+/* Toast Popover top-layer transitions */
+.toast-viewport[popover] {
+  position: fixed;
+  inset: auto 1.25rem 1.25rem auto;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  overflow: visible;
+  color: inherit;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    overlay 180ms ease,
+    display 180ms ease;
+  transition-behavior: allow-discrete;
+}
+
+.toast-viewport[popover]:is(:popover-open, .\:popover-open) {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@starting-style {
+  .toast-viewport[popover]:is(:popover-open, .\:popover-open) {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast-viewport[popover] {
+    transition: none;
+    transform: none;
+  }
+
+  .toast-viewport[popover]:is(:popover-open, .\:popover-open) {
+    transform: none;
+  }
+}
+
+/* FloatingDockNav Scrollspy */
+.dock-nav-links {
+  scroll-target-group: auto;
+}
+
+.dock-nav-link[aria-current="true"] {
+  color: var(--text-primary);
+}
+
+/* Architecture X-Ray global blueprint grid */
+html[data-inspector="active"] body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--accent-primary) 7%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--accent-primary) 7%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 32px 32px;
+}
+
+@media (forced-colors: active) {
+  html[data-inspector="active"] body::before {
+    display: none;
+  }
+}
+
+/* ============================================================================
+ * Phase 3 Styles: Architecture Graph Flow & Case-Study Top-Layer Drawer
+ * ============================================================================ */
+
+@keyframes architecture-dash-flow {
+  from {
+    stroke-dashoffset: 16;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.architecture-edge-flow {
+  animation: architecture-dash-flow 1.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .architecture-edge-flow {
+    animation: none;
+  }
+}
+
+/* 4-Pillar Experience Matrix CSS containment (isolates hover style/layout recalculations) */
+.matrix-pillar-shell {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px auto 540px;
+}
+
+@supports not (content-visibility: auto) {
+  .matrix-pillar-shell {
+    contain: layout style;
+  }
+}
+
+/* Case-Study Modal Drawer (Native Top-Layer <dialog> with @starting-style) */
+dialog.case-study-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  width: min(44rem, 100vw);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  opacity: 0;
+  transition-property: opacity, transform, display, overlay;
+  transition-duration: 240ms;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transition-behavior: allow-discrete;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  dialog.case-study-drawer {
+    transform: translateX(28px);
+  }
+}
+
+dialog.case-study-drawer:modal {
+  overscroll-behavior: contain;
+}
+
+dialog.case-study-drawer[open]:where(:not([data-closing])) {
+  display: flex;
+  flex-direction: column;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  dialog.case-study-drawer[open]:where(:not([data-closing])) {
+    transform: translateX(0);
+  }
+}
+
+@starting-style {
+  dialog.case-study-drawer[open]:where(:not([data-closing])) {
+    opacity: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    dialog.case-study-drawer[open]:where(:not([data-closing])) {
+      transform: translateX(28px);
+    }
+  }
+}
+
+dialog.case-study-drawer::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: rgb(7 8 10 / 0);
+  backdrop-filter: blur(0px);
+  transition-property: background-color, backdrop-filter, display, overlay;
+  transition-duration: 240ms;
+  transition-timing-function: ease-out;
+  transition-behavior: allow-discrete;
+}
+
+dialog.case-study-drawer[open]:where(:not([data-closing]))::backdrop {
+  background-color: color-mix(in oklab, var(--surface-canvas) 76%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+@starting-style {
+  dialog.case-study-drawer[open]:where(:not([data-closing]))::backdrop {
+    background-color: rgb(7 8 10 / 0);
+    backdrop-filter: blur(0px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.case-study-drawer,
+  dialog.case-study-drawer::backdrop {
+    transition-duration: 100ms;
+  }
+}
+
+/* ============================================================================
+ * Phase 4 Styles: Legal Modal <dialog> & Accessible Form Validation
+ * ============================================================================ */
+
+dialog.legal-modal-dialog {
+  margin: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  width: min(40rem, calc(100vw - 1.5rem));
+  max-width: min(40rem, calc(100vw - 1.5rem));
+  overflow: visible;
+}
+
+dialog.legal-modal-dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+dialog.legal-modal-dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog.legal-modal-dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background: color-mix(in oklab, var(--surface-canvas) 76%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+/* Defer validation visuals until after user interaction (:user-invalid / :user-valid) */
+.contact-input:user-invalid {
+  border-color: var(--accent-crimson);
+}
+
+.contact-input:user-valid {
+  border-color: color-mix(in oklab, var(--accent-emerald) 55%, var(--border-default));
+}
+
+/* ============================================================================
+ * Phase 5 Styles: Procedural Audio Equalizer & WebGL Telemetry Fallback
+ * ============================================================================ */
+
+@keyframes audio-eq-bar {
+  0%,
+  100% {
+    transform: scaleY(0.32);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+.audio-eq-bar {
+  transform-origin: bottom center;
+  animation: audio-eq-bar 1.05s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.audio-eq-bar-1 {
+  animation-delay: 0ms;
+}
+
+.audio-eq-bar-2 {
+  animation-delay: 180ms;
+  animation-duration: 0.88s;
+}
+
+.audio-eq-bar-3 {
+  animation-delay: 340ms;
+  animation-duration: 1.18s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .audio-eq-bar {
+    animation: none;
+    transform: scaleY(0.75);
+  }
+}
+
+.telemetry-shader-fallback {
+  background-color: var(--surface-canvas);
+  background-image:
+    radial-gradient(
+      ellipse 70% 55% at 28% 12%,
+      color-mix(in oklab, var(--accent-primary) 12%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 45% 45% at 78% 28%,
+      color-mix(in oklab, var(--accent-emerald) 6%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--border-subtle) 45%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--border-subtle) 45%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+}
